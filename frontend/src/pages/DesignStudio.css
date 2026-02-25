@@ -1,0 +1,23 @@
+.design-studio .x6-graph {
+  background: #fafafa;
+}
+
+.design-studio .x6-node {
+  cursor: pointer;
+}
+
+.design-studio .x6-edge:hover path {
+  stroke: #1890ff;
+  stroke-width: 3;
+}
+
+.design-studio .node-config {
+  padding: 16px;
+}
+
+.design-studio .node-config label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
