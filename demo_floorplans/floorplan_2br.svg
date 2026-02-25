@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8f8f8"/>
+  
+  <!-- Title -->
+  <text x="400.0" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">两室一厅 (78㎡)</text>
+  
+  <!-- Rooms -->
+  <rect x="50" y="100" width="200" height="150" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="150.0" y="175.0" text-anchor="middle" font-size="12" fill="#333">主卧</text>
+  <text x="150.0" y="190.0" text-anchor="middle" font-size="9" fill="#666">20×15m</text>
+  <rect x="270" y="100" width="180" height="150" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="360.0" y="175.0" text-anchor="middle" font-size="12" fill="#333">次卧</text>
+  <text x="360.0" y="190.0" text-anchor="middle" font-size="9" fill="#666">18×15m</text>
+  <rect x="50" y="270" width="400" height="120" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="250.0" y="330.0" text-anchor="middle" font-size="12" fill="#333">客厅</text>
+  <text x="250.0" y="345.0" text-anchor="middle" font-size="9" fill="#666">40×12m</text>
+  <rect x="470" y="100" width="150" height="150" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="545.0" y="175.0" text-anchor="middle" font-size="12" fill="#333">厨房</text>
+  <text x="545.0" y="190.0" text-anchor="middle" font-size="9" fill="#666">15×15m</text>
+  <rect x="470" y="270" width="150" height="120" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="545.0" y="330.0" text-anchor="middle" font-size="12" fill="#333">卫生间</text>
+  <text x="545.0" y="345.0" text-anchor="middle" font-size="9" fill="#666">15×12m</text>
+  
+  <!-- North Arrow -->
+  <text x="760" y="60" font-size="16" font-weight="bold" fill="#333">N ↑</text>
+  
+  <!-- Scale -->
+  <text x="740" y="580" font-size="12" fill="#666">1:100</text>
+</svg>

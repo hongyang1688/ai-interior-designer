@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="850" height="550" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="850" height="550" fill="#f8f8f8"/>
+  
+  <!-- Title -->
+  <text x="425.0" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">四室两厅 (145㎡)</text>
+  
+  <!-- Rooms -->
+  <rect x="50" y="80" width="200" height="180" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="150.0" y="170.0" text-anchor="middle" font-size="12" fill="#333">主卧+卫</text>
+  <text x="150.0" y="185.0" text-anchor="middle" font-size="9" fill="#666">20×18m</text>
+  <rect x="270" y="80" width="170" height="180" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="355.0" y="170.0" text-anchor="middle" font-size="12" fill="#333">次卧1</text>
+  <text x="355.0" y="185.0" text-anchor="middle" font-size="9" fill="#666">17×18m</text>
+  <rect x="460" y="80" width="170" height="180" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="545.0" y="170.0" text-anchor="middle" font-size="12" fill="#333">次卧2</text>
+  <text x="545.0" y="185.0" text-anchor="middle" font-size="9" fill="#666">17×18m</text>
+  <rect x="650" y="80" width="150" height="180" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="725.0" y="170.0" text-anchor="middle" font-size="12" fill="#333">书房</text>
+  <text x="725.0" y="185.0" text-anchor="middle" font-size="9" fill="#666">15×18m</text>
+  <rect x="50" y="280" width="400" height="200" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="250.0" y="380.0" text-anchor="middle" font-size="12" fill="#333">客厅</text>
+  <text x="250.0" y="395.0" text-anchor="middle" font-size="9" fill="#666">40×20m</text>
+  <rect x="470" y="280" width="200" height="200" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="570.0" y="380.0" text-anchor="middle" font-size="12" fill="#333">餐厅/厨房</text>
+  <text x="570.0" y="395.0" text-anchor="middle" font-size="9" fill="#666">20×20m</text>
+  <rect x="690" y="280" width="110" height="200" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="745.0" y="380.0" text-anchor="middle" font-size="12" fill="#333">阳台</text>
+  <text x="745.0" y="395.0" text-anchor="middle" font-size="9" fill="#666">11×20m</text>
+  
+  <!-- North Arrow -->
+  <text x="810" y="60" font-size="16" font-weight="bold" fill="#333">N ↑</text>
+  
+  <!-- Scale -->
+  <text x="790" y="530" font-size="12" fill="#666">1:100</text>
+</svg>
