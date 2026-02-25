@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI设计工作室 - Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; }
+        
+        .header { background: #1890ff; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; }
+        
+        .container { display: flex; height: calc(100vh - 64px); }
+        
+        /* Left Panel - DAG */
+        .dag-panel { flex: 1; background: #fafafa; position: relative; overflow: hidden; }
+        .dag-canvas { width: 100%; height: 100%; position: relative; }
+        
+        .node {
+            position: absolute;
+            width: 180px;
+            background: white;
+            border: 2px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .node:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .node.active { border-color: #1890ff; background: #e6f7ff; }
+        .node.completed { border-color: #52c41a; }
+        .node.processing { border-color: #1890ff; animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(24, 144, 255, 0); }
+        }
+        
+        .node-icon { font-size: 24px; margin-bottom: 8px; }
+        .node-title { font-weight: bold; margin-bottom: 4px; }
+        .node-desc { font-size: 12px; color: #666; }
+        .node-status { margin-top: 8px; font-size: 12px; }
+        
+        .edge {
+            position: absolute;
+            height: 2px;
+            background: #1890ff;
+            transform-origin: left center;
+        }
+        
+        /* Right Panel - Controls */
+        .control-panel { width: 300px; background: white; border-left: 1px solid #e8e8e8; padding: 20px; overflow-y: auto; }
+        .control-panel h3 { margin-bottom: 16px; color: #333; }
+        
+        .view-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #d9d9d9;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        .view-btn:hover { border-color: #1890ff; color: #1890ff; }
+        .view-btn.active { background: #1890ff; color: white; border-color: #1890ff; }
+        
+        .progress-bar { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; margin: 16px 0; }
+        .progress-fill { height: 100%; background: #1890ff; transition: width 0.3s; }
+        
+        /* 3D View Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            width: 90vw;
+            height: 90vh;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 16px 24px;
+            background: #1890ff;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            flex: 1;
+            display: flex;
+        }
+        
+        .view-3d {
+            flex: 1;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .room-preview {
+            width: 600px;
+            height: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .room-visual {
+            flex: 1;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            position: relative;
+        }
+        
+        .room-furniture {
+            position: absolute;
+            background: #8B4513;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .room-furniture:hover { transform: scale(1.05); }
+        
+        .sofa {
+            width: 120px;
+            height: 60px;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D2691E;
+        }
+        
+        .tv {
+            width: 80px;
+            height: 10px;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+        }
+        
+        .table {
+            width: 60px;
+            height: 60px;
+            bottom: 100px;
+            right: 100px;
+            background: #DEB887;
+            border-radius: 50%;
+        }
+        
+        .room-info {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e8e8e8;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .toolbar button {
+            padding: 8px 16px;
+            border: 1px solid #d9d9d9;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .toolbar button.active {
+            background: #1890ff;
+            color: white;
+            border-color: #1890ff;
+        }
+        
+        .log-panel {
+            background: #1a1a2e;
+            color: #52c41a;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 120px;
+            overflow-y: auto;
+            margin-top: 16px;
+            border-radius: 4px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .status-pending { background: #f0f0f0; color: #666; }
+        .status-processing { background: #e6f7ff; color: #1890ff; }
+        .status-completed { background: #f6ffed; color: #52c41a; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏠 AI设计工作室</h1>
+        <div>
+            <span id="project-name">万科城 105㎡</span>
+            <span class="status-badge status-processing">处理中 65%</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- DAG Canvas -->
+        <div class="dag-panel">
+            <div class="toolbar" style="padding: 16px;">
+                <button onclick="startProcess()" style="background: #52c41a; color: white;">▶ 开始</button>
+                <button onclick="pauseProcess()">⏸ 暂停</button>
+                <button onclick="resetProcess()">↺ 重置</button>
+            </div>
+            <div class="dag-canvas" id="dagCanvas">
+                <!-- Nodes will be generated by JS -->
+            </div>
+        </div>
+        
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h3>📐 户型图</h3>
+            <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 48px;">🏠</div>
+                <div style="margin-top: 8px; font-weight: bold;">三室两厅</div>
+                <div style="color: #666; font-size: 12px;">105㎡ · 南北通透</div>
+            </div>
+            
+            <h3>🎨 风格预览</h3>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                <button class="view-btn active" onclick="changeStyle('modern')">现代简约</button>
+                <button class="view-btn" onclick="changeStyle('nordic')">北欧风</button>
+                <button class="view-btn" onclick="changeStyle('chinese')">新中式</button>
+                <button class="view-btn" onclick="changeStyle('luxury')">轻奢</button>
+            </div>
+            
+            <h3>👁️ 3D漫游视角</h3>
+            <button class="view-btn active" onclick="open3DView('bird')">🦅 鸟瞰图</button>
+            <button class="view-btn" onclick="open3DView('sofa')">🛋️ 沙发视角</button>
+            <button class="view-btn" onclick="open3DView('tv')">📺 电视视角</button>
+            <button class="view-btn" onclick="open3DView('entrance')">🚪 入口视角</button>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 65%"></div>
+            </div>
+            <div style="text-align: center; color: #666; font-size: 12px;">
+                总体进度: <span id="progressText">65%</span>
+            </div>
+            
+            <div class="log-panel" id="logPanel">
+                <div>[12:00:00] 开始处理...</div>
+                <div>[12:00:01] 户型解析完成 ✓</div>
+                <div>[12:00:05] 风格渲染中...</div>
+                <div>[12:00:10] 正在生成客厅效果图</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 3D View Modal -->
+    <div class="modal-overlay" id="modal3D">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎬 3D漫游 - <span id="viewName">鸟瞰图</span></h2>
+                <button class="close-btn" onclick="close3DView()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="width: 200px; background: #fafafa; padding: 16px; border-right: 1px solid #e8e8e8;">
+                    <h4 style="margin-bottom: 12px;">切换视角</h4>
+                    <button class="view-btn" onclick="switchView('bird')">🦅 鸟瞰图</button>
+                    <button class="view-btn" onclick="switchView('sofa')">🛋️ 沙发视角</button>
+                    <button class="view-btn" onclick="switchView('tv')">📺 电视视角</button>
+                    <button class="view-btn" onclick="switchView('entrance')">🚪 入口</button>
+                    <button class="view-btn" onclick="switchView('kitchen')">🍳 厨房</button>
+                    
+                    <h4 style="margin: 16px 0 12px;">风格切换</h4>
+                    <button class="view-btn" onclick="changeRoomStyle('modern')">现代简约</button>
+                    <button class="view-btn" onclick="changeRoomStyle('nordic')">北欧风</button>
+                    <button class="view-btn" onclick="changeRoomStyle('luxury')">轻奢</button>
+                </div>
+                <div class="view-3d">
+                    <div class="room-preview">
+                        <div class="room-visual" id="roomVisual">
+                            <div class="room-furniture sofa" onclick="clickFurniture('sofa')" title="沙发"></div>
+                            <div class="room-furniture tv" onclick="clickFurniture('tv')" title="电视"></div>
+                            <div class="room-furniture table" onclick="clickFurniture('table')" title="茶几"></div>
+                            <div style="position: absolute; top: 20px; left: 20px; font-size: 14px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px;">
+                                点击家具查看详情
+                            </div>
+                        </div>
+                        <div class="room-info">
+                            <h3>客厅 - <span id="roomStyle">现代简约</span></h3>
+                            <p style="color: #666; font-size: 14px; margin-top: 4px;">
+                                35㎡ · 南向采光 · 当前视角: <span id="currentView">鸟瞰图</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DAG Nodes Configuration
+        const nodes = [
+            { id: 'input', label: '户型图输入', icon: '📁', desc: '已加载 5张图片', x: 50, y: 150, status: 'completed' },
+            { id: 'analysis', label: '户型解析', icon: '🔍', desc: '识别完成', x: 300, y: 150, status: 'completed' },
+            { id: 'style', label: '风格渲染', icon: '🎨', desc: '生成中 65%', x: 550, y: 50, status: 'processing' },
+            { id: 'cad', label: 'CAD图纸', icon: '📐', desc: '等待中', x: 550, y: 150, status: 'pending' },
+            { id: 'materials', label: '材料匹配', icon: '🛒', desc: '等待中', x: 550, y: 250, status: 'pending' },
+            { id: 'output', label: '输出交付', icon: '📦', desc: '等待中', x: 800, y: 150, status: 'pending' }
+        ];
+        
+        // Render DAG
+        function renderDAG() {
+            const canvas = document.getElementById('dagCanvas');
+            canvas.innerHTML = '';
+            
+            nodes.forEach((node, index) => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = `node ${node.status}`;
+                nodeEl.style.left = node.x + 'px';
+                nodeEl.style.top = node.y + 'px';
+                nodeEl.onclick = () => clickNode(node);
+                
+                nodeEl.innerHTML = `
+                    <div class="node-icon">${node.icon}</div>
+                    <div class="node-title">${node.label}</div>
+                    <div class="node-desc">${node.desc}</div>
+                    <div class="node-status">
+                        ${node.status === 'completed' ? '✅ 已完成' : 
+                          node.status === 'processing' ? '🔄 处理中...' : '⏳ 等待中'}
+                    </div>
+                `;
+                
+                canvas.appendChild(nodeEl);
+                
+                // Draw edges
+                if (index < nodes.length - 1 && index !== 2 && index !== 3) {
+                    const nextNode = nodes[index + 1];
+                    drawEdge(canvas, node, nextNode);
+                }
+                if (index === 1) {
+                    // From analysis to style/cad/materials
+                    drawEdge(canvas, node, nodes[2]);
+                    drawEdge(canvas, node, nodes[3]);
+                    drawEdge(canvas, node, nodes[4]);
+                }
+                if (index >= 2 && index <= 4) {
+                    // To output
+                    drawEdge(canvas, node, nodes[5]);
+                }
+            });
+        }
+        
+        function drawEdge(canvas, from, to) {
+            const edge = document.createElement('div');
+            edge.className = 'edge';
+            const dx = to.x - from.x - 180;
+            const dy = to.y - from.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            edge.style.width = length + 'px';
+            edge.style.left = (from.x + 180) + 'px';
+            edge.style.top = (from.y + 40) + 'px';
+            edge.style.transform = `rotate(${angle}deg)`;
+            
+            canvas.appendChild(edge);
+        }
+        
+        function clickNode(node) {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            addLog(`[${new Date().toLocaleTimeString()}] 点击节点: ${node.label}`);
+            
+            if (node.id === 'style' || node.id === 'output') {
+                open3DView('bird');
+            }
+        }
+        
+        function addLog(message) {
+            const logPanel = document.getElementById('logPanel');
+            const div = document.createElement('div');
+            div.textContent = message;
+            logPanel.appendChild(div);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+        
+        // 3D View Functions
+        function open3DView(view) {
+            document.getElementById('modal3D').classList.add('active');
+            switchView(view);
+        }
+        
+        function close3DView() {
+            document.getElementById('modal3D').classList.remove('active');
+        }
+        
+        function switchView(view) {
+            const viewNames = {
+                'bird': '鸟瞰图',
+                'sofa': '沙发视角',
+                'tv': '电视视角',
+                'entrance': '入口',
+                'kitchen': '厨房'
+            };
+            
+            document.getElementById('viewName').textContent = viewNames[view];
+            document.getElementById('currentView').textContent = viewNames[view];
+            
+            // Update button states
+            document.querySelectorAll('.modal-body .view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Simulate view change
+            const visual = document.getElementById('roomVisual');
+            visual.style.opacity = '0.5';
+            setTimeout(() => {
+                visual.style.opacity = '1';
+            }, 200);
+        }
+        
+        function changeStyle(style) {
+            document.querySelectorAll('.control-panel .view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const styleNames = {
+                'modern': '现代简约',
+                'nordic': '北欧风',
+                'chinese': '新中式',
+                'luxury': '轻奢'
+            };
+            
+            addLog(`[${new Date().toLocaleTimeString()}] 切换风格: ${styleNames[style]}`);
+        }
+        
+        function changeRoomStyle(style) {
+            const styleNames = {
+                'modern': '现代简约',
+                'nordic': '北欧风',
+                'luxury': '轻奢'
+            };
+            document.getElementById('roomStyle').textContent = styleNames[style];
+            
+            // Change room background color
+            const colors = {
+                'modern': 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
+                'nordic': 'linear-gradient(135deg, #faf8f5 0%, #f0ebe3 100%)',
+                'luxury': 'linear-gradient(135deg, #f8f8f8 0%, #e8e0d5 100%)'
+            };
+            document.getElementById('roomVisual').style.background = colors[style];
+        }
+        
+        function clickFurniture(name) {
+            const names = { 'sofa': '沙发', 'tv': '电视', 'table': '茶几' };
+            alert(`点击了: ${names[name]}\n\n可以在这里显示家具详情、更换材质等操作。`);
+        }
+        
+        // Process Control
+        let progress = 65;
+        let isRunning = true;
+        
+        function startProcess() {
+            isRunning = true;
+            addLog('[系统] 开始处理流程');
+            simulateProgress();
+        }
+        
+        function pauseProcess() {
+            isRunning = false;
+            addLog('[系统] 已暂停');
+        }
+        
+        function resetProcess() {
+            isRunning = false;
+            progress = 0;
+            updateProgress(0);
+            addLog('[系统] 已重置');
+        }
+        
+        function simulateProgress() {
+            if (!isRunning || progress >= 100) return;
+            
+            progress += Math.random() * 5;
+            if (progress > 100) progress = 100;
+            
+            updateProgress(progress);
+            
+            if (progress < 100) {
+                setTimeout(simulateProgress, 1000);
+            } else {
+                addLog('[系统] 处理完成！');
+            }
+        }
+        
+        function updateProgress(value) {
+            document.getElementById('progressBar').style.width = value + '%';
+            document.getElementById('progressText').textContent = Math.floor(value) + '%';
+        }
+        
+        // Initialize
+        renderDAG();
+        
+        // Close modal on outside click
+        document.getElementById('modal3D').onclick = function(e) {
+            if (e.target === this) close3DView();
+        };
+    </script>
+</body>
+</html>
