@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     SD_API_URL: str = "http://localhost:7860"
     CAD_SERVICE_URL: str = ""
     
+    # Kimi AI
+    KIMI_API_KEY: str = ""
+    KIMI_API_BASE: str = "https://api.moonshot.cn/v1"
+    KIMI_MODEL: str = "kimi-coding/k2p5"  # 或 kimi-coding/k2p5
+    
     class Config:
         env_file = ".env"
 
